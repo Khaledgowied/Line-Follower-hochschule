@@ -1,0 +1,159 @@
+//motors
+#define input1 13
+#define input2 12
+#define input3 7
+#define input4 6
+#define enA 11
+#define enB 5
+
+  int LEFT_SENSOR;
+ 
+  int RIGHT_SENSOR;
+
+#define echo 8    //Echo pin
+#define trigger 9 //Trigger pin
+
+//ir sensors
+#define LirSensor 3
+#define RirSensor 4
+
+int maxSpeed = 95;   //100
+
+int turnSpeed = 75;
+
+int duration;
+int distance;
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(input1, OUTPUT);
+  pinMode(input2, OUTPUT);
+  pinMode(input3, OUTPUT);
+  pinMode(input4, OUTPUT);
+
+  pinMode(enA, OUTPUT);
+  pinMode(enB, OUTPUT);
+
+  pinMode(LirSensor, INPUT);
+  pinMode(RirSensor, INPUT);
+
+pinMode(echo, INPUT);
+pinMode(trigger, OUTPUT);
+
+}
+
+void loop() {
+
+// Clears the trigPin
+  digitalWrite(trigger, LOW);
+  delayMicroseconds(2);
+  // Sets the trigPin on HIGH state for 10 micro seconds
+  digitalWrite(trigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigger, LOW);
+  // Reads the echoPin, returns the sound wave travel time in microseconds
+  duration = pulseIn(echo, HIGH);
+  // Calculating the distance
+  distance = duration * 0.034 / 2;
+
+
+  //for Line follow
+  int LEFT_SENSOR = digitalRead(LirSensor);
+  int RIGHT_SENSOR = digitalRead(RirSensor);
+
+  Serial.print("leftsenor: ");
+  Serial.print(LEFT_SENSOR);
+  Serial.print("   ");
+  Serial.print("RIghtsenor: ");
+  Serial.print(RIGHT_SENSOR);
+
+
+
+  if (RIGHT_SENSOR == 0 && LEFT_SENSOR == 0) { // 1 =black, 0= white
+    forward(); //FORWARD
+  }
+  else if (RIGHT_SENSOR == 1 && LEFT_SENSOR == 0) {
+    right(); //Move Right
+  }
+  else if (RIGHT_SENSOR == 0 && LEFT_SENSOR == 1) {
+    left(); //Move Left
+  }
+  else if (RIGHT_SENSOR == 1 && LEFT_SENSOR == 1) {
+
+  }
+avoidobject();
+}
+
+void forward()
+{
+  digitalWrite(input1, HIGH);
+  digitalWrite(input2, LOW);
+  digitalWrite(input3, HIGH);
+  digitalWrite(input4, LOW);
+
+  analogWrite(enA,maxSpeed);
+  analogWrite(enB, 130);
+}
+
+void right()
+{
+  digitalWrite(input1, LOW);
+  digitalWrite(input2, HIGH);
+  digitalWrite(input3, HIGH);
+  digitalWrite(input4, LOW);
+
+  analogWrite(enA, turnSpeed);
+  analogWrite(enB, 105);
+}
+
+void left()
+{
+  digitalWrite(input1, HIGH);
+  digitalWrite(input2, LOW);
+  digitalWrite(input3, LOW);
+  digitalWrite(input4, HIGH);
+
+  analogWrite(enA, turnSpeed);
+  analogWrite(enB, 105);
+}
+void Stop()
+{
+  digitalWrite(input1, LOW);
+  digitalWrite(input2, LOW);
+  digitalWrite(input3, LOW);
+  digitalWrite(input4, LOW);
+}
+
+void avoidobject(){
+if (distance<20) {
+
+   left();
+  
+delay(700);
+
+  forward();
+  delay(1700);
+
+  right();
+  delay(1400);
+
+
+   forward();
+
+while(LEFT_SENSOR == 0){
+
+LEFT_SENSOR = digitalRead(LirSensor);
+}
+Stop();
+delay(750);
+
+forward();
+delay(500);
+
+Stop();
+delay(750);
+
+ left();
+ delay(900);
+}
+}
